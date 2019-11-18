@@ -1,43 +1,116 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>大事件-后台登录页</title>
+    <link rel="stylesheet" type="text/css" href="css/reset.css" />
+    <link rel="stylesheet" type="text/css" href="css/iconfont.css" />
+    <link rel="stylesheet" type="text/css" href="css/main.css" />
+    <!-- 引入bootstrap的css文件 -->
+    <link rel="stylesheet" href="./libs/bootstrap/css/bootstrap.min.css" />
+    <!-- 引入jq文件 -->
+    <script src="./libs/jquery-1.12.4.min.js"></script>
+    <!-- 引入bootstrap的js文件 -->
+    <script src="./libs/bootstrap/js/bootstrap.min.js"></script>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-  <title>大事件-后台登录页</title>
-  <link rel="stylesheet" type="text/css" href="css/reset.css" />
-  <link rel="stylesheet" type="text/css" href="css/iconfont.css" />
-  <link rel="stylesheet" type="text/css" href="css/main.css" />
-  <!-- 引入bootstrap的css文件 -->
-  <link rel="stylesheet" href="./libs/bootstrap/css/bootstrap.min.css" />
-  <!-- 引入jq文件 -->
-  <script src="./libs/jquery-1.12.4.min.js"></script>
-  <!-- 引入bootstrap的js文件 -->
-  <script src="./libs/bootstrap/js/bootstrap.min.js"></script>
-</head>
+  <body>
+    <div class="main_wrap">
+      <div class="header">
+        <a href="#" class="logo"><img src="images/logo.png" alt=""/></a>
+        <div class="copyright">
+          CopyRight © 2019 深圳百秀信息技术股份有限公司<br />All Rights Reserved
+        </div>
+      </div>
 
-<body>
-  <div class="main_wrap">
-    <div class="header">
-      <a href="#" class="logo"><img src="images/logo.png" alt="" /></a>
-      <div class="copyright">
-        CopyRight © 2019 深圳百秀信息技术股份有限公司<br />All Rights Reserved
+      <div class="login_form_con">
+        <div class="login_title"></div>
+        <form class="login_form">
+          <i class="iconfont icon-user"></i>
+          <i class="iconfont icon-key"></i>
+          <input type="text" class="input_txt" placeholder="邮箱/手机号" />
+          <input type="password" class="input_pass" placeholder="密码" />
+          <input type="submit" class="input_sub" value="登 录" />
+        </form>
       </div>
     </div>
 
-    <div class="login_form_con">
-      <div class="login_title"></div>
-      <form class="login_form">
-        <i class="iconfont icon-user"></i>
-        <i class="iconfont icon-key"></i>
-        <input type="text" class="input_txt" placeholder="邮箱/手机号" />
-        <input type="password" class="input_pass" placeholder="密码" />
-        <input type="submit" class="input_sub" value="登 录" />
-      </form>
+    <div
+      class="modal fade"
+      id="myModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="myModalLabel"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title" id="myModalLabel">温馨提示</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">
+              确认
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
 
-</body>
+    <script>
+      $(function() {
+        //添加登录按钮的点击事件
+        $(".input_sub").on("click", function(e) {
+          //修改submit按钮的默认设置
+          e.preventDefault();
+          //获取用户名和密码
+          var userName = $(".input_txt")
+            .val()
+            .trim();
+          var userPwd = $(".input_pass")
+            .val()
+            .trim();
 
+          //判断用户名密码为空情况
+          if (userName == "" || userPwd == "") {
+            //用modal方法控制弹出模态框
+            $("#myModal").modal();
+            $(".modal-body").html("请输入用户名或密码");
+            return;
+          }
+          //发送一个Ajax请求
+          $.ajax({
+            type: "post",
+            url: "http://localhost:8080/api/v1/admin/user/login",
+            data: {
+              username: userName,
+              password: userPwd
+            },
+            success: function(res) {
+              //获取返回结果中的msg属性来渲染模态框文本内容
+              $(".modal-body").html(res.msg);
+              $("#myModal").modal();
+              //if判断用户名和密码是否正确，正确的话res.code值为200
+              if (res.code == 200) {
+                // $(".modal-body").text("登录成功");
+                $("#myModal").on("hidden.bs.modal", function(e) {
+                  window.location.href = "./index.html";
+                });
+              }
+            }
+          });
+        });
+      });
+    </script>
+  </body>
 </html>
