@@ -102,6 +102,8 @@
               $("#myModal").modal();
               //if判断用户名和密码是否正确，正确的话res.code值为200
               if (res.code == 200) {
+                //登录成功则将令牌token存储到本地存储上，这样方便以后事件请求时可以直接取出进行判断是否登录成功
+                window.localStorage.setItem("token", res.token);
                 // $(".modal-body").text("登录成功");
                 $("#myModal").on("hidden.bs.modal", function(e) {
                   window.location.href = "./index.html";
