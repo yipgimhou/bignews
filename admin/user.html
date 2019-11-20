@@ -56,8 +56,7 @@
                 <div class="form-group">
                     <label for="inputEmail4" class="col-sm-2 control-label">密码：</label>
                     <div class="col-sm-4">
-                        <input type="password" name="password" class="form-control password" id="inputEmail4"
-                            value="12345678">
+                        <input type="password" name="password" class="form-control password" id="inputEmail4" value="">
                     </div>
                 </div>
                 <div class="form-group">
@@ -66,6 +65,25 @@
                     </div>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">温馨提示</h4>
+                </div>
+                <div class="modal-body"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        确认
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
     <script>
@@ -81,6 +99,8 @@
                         }
                         //图片信息单独修改
                         $('.user_pic').attr('src', res.data.userPic);
+                        // var OldPwd = $('input.password').val();
+                        // console.log(OldPwd);
                     }
                 }
 
@@ -95,6 +115,7 @@
                 $('.user_pic').attr('src', url);
 
             })
+
             //点击修改按钮实现修改功能
             $("button.btn-edit").on('click', function (e) {
                 //清除submit默认设置
@@ -102,6 +123,7 @@
                 //获取表单的全部信息并转化为二进制
                 var form = $('#form')[0];
                 var formData = new FormData(form);
+
                 //将转化为二进制的表单信息post发送到服务器上
                 $.post({
                     url: 'http://localhost:8080/api/v1/admin/user/edit',
@@ -113,6 +135,7 @@
                         if (res.code == 200) {
                             //post成功后，将新的数据再次渲染在子页面和父页面中
                             //再次发起一次跟index页面中一样的get请求
+                            console.log(res);
                             $.ajax({
                                 type: 'get',
                                 url: 'http://localhost:8080/api/v1/admin/user/info',
@@ -126,8 +149,17 @@
                                     parent.$('.user_center_link>img').attr('src', res.data.userPic);
                                     //刷新子页面信息
                                     window.location.reload();
+                                    // if (res.data.password !== OldPwd) {
+                                    //     console.log('111')
+                                    //     //删除token
+                                    //     window.localStorage.removeItem('token');
+
+                                    //     //回到登录页面
+                                    //     parent.window.location.href = './login.html';
+                                    // }
                                 }
                             })
+
                         }
                     }
                 })
