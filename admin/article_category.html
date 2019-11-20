@@ -65,15 +65,19 @@
     </script>
     <script>
         $(function () {
-            $.get({
-                url: 'http://localhost:8080/api/v1/admin/category/list',
-                success: function (res) {
-                    if (res.code == 200) {
-                        var htmlStr = template('list', res);
-                        $('tbody').html(htmlStr);
+            getData();
+            function getData() {
+                $.get({
+                    url: 'http://localhost:8080/api/v1/admin/category/list',
+                    success: function (res) {
+                        if (res.code == 200) {
+                            var htmlStr = template('list', res);
+                            $('tbody').html(htmlStr);
+                        }
                     }
-                }
-            })
+                })
+            }
+
         })
     </script>
 </body>
