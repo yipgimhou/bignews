@@ -104,6 +104,7 @@
                     $('#exampleModalLabel').text('新增文章分类名');
                     $('#btn-confirm').addClass('btn-success');
                     $('#btn-confirm').text('新增');
+                    $('.modal-body form')[0].reset();
                     $('#btn-confirm').on('click', function () {
                         var name = $('#recipient-name').val();
                         var slug = $('#message-text').val();
@@ -124,8 +125,61 @@
                 } else {
                     $('#exampleModalLabel').text('编辑文章分类名');
                     $('#btn-confirm').text('编辑');
+                    var id = $(e.relatedTarget).attr('data-id');
+                    console.log(e.relatedTarget);
+                    $.get({
+                        url: 'http://localhost:8080/api/v1/admin/category/search',
+                        data: {
+                            id: id
+                        },
+                        success: function (res) {
+                            if (res.code == 200) {
+                                $('#cateID').val(res.data[0].id);
+                                $('#recipient-name').val(res.data[0].name);
+                                $('#message-text').val(res.data[0].slug);
+                            }
+                        }
+                    })
+                    $('#btn-confirm').on('click', function () {
+                        var id = $('#cateID').val();
+                        var name = $('#recipient-name').val();
+                        var slug = $('#message-text').val();
+                        $.post({
+                            url: 'http://localhost:8080/api/v1/admin/category/edit',
+                            data: {
+                                id: id,
+                                name: name,
+                                slug: slug
+                            },
+                            success: function (res) {
+                                if (res.code == 200) {
+                                    $('#myModal').modal('hide');
+                                    getData();
+                                }
+
+                            }
+                        })
+                    })
                 }
             })
+
+            $('tbody').on('click', '.btn-danger', function () {
+                var choose = confirm('确认要删除吗？');
+                var id = $(this).attr('data-id');
+                if (choose) {
+                    $.post({
+                        url: 'http://localhost:8080/api/v1/admin/category/delete',
+                        data: {
+                            id: id
+                        },
+                        success: function (res) {
+                            getData();
+                        }
+                    })
+                }
+
+            })
+
         })
     </script>
 </body>
