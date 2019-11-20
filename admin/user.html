@@ -70,6 +70,7 @@
 
     <script>
         $(function () {
+            var OldUrm;
             var OldPwd;
             $.get({
                 url: 'http://localhost:8080/api/v1/admin/user/detail',
@@ -82,8 +83,9 @@
                         }
                         //图片信息单独修改
                         $('.user_pic').attr('src', res.data.userPic);
+                        //将获取到的管理员账号和密码放到全局变量OldUrm和OldPwd，用来后面修改时进行判断
+                        OldUrm = $('input.username').val();
                         OldPwd = $('input.password').val();
-                        // console.log(OldPwd);
                     }
                 }
 
@@ -123,6 +125,7 @@
                                 type: 'get',
                                 url: 'http://localhost:8080/api/v1/admin/user/info',
                                 headers: {
+                                    //设置请求头，用来装载管理员登录成功后获得的本地存储令牌
                                     Authorization: localStorage.getItem('token')
                                 },
                                 success: function (res) {
@@ -132,11 +135,10 @@
                                     parent.$('.user_center_link>img').attr('src', res.data.userPic);
                                     //刷新子页面信息
                                     window.location.reload();
-                                    if (res.data.password !== OldPwd) {
+                                    if (res.data.password !== OldPwd || res.data.username !== OldUrm) {
                                         alert('修改成功，请重新登录');
                                         //删除token
                                         window.localStorage.removeItem('token');
-
                                         //回到登录页面
                                         parent.window.location.href = './login.html';
                                     }
