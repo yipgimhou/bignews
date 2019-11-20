@@ -31,14 +31,6 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- <tr>
-                        <td>奇趣事</td>
-                        <td>funny</td>
-                        <td class="text-center">
-                            <a href="javascript:void(0)" data-toggle="modal" class=" btn btn-info btn-xs">编辑</a>
-                            <a href="javascript:void(0)" class="btn btn-danger btn-xs">删除</a>
-                        </td>
-                    </tr> -->
                 </tbody>
                 <tfoot>
                     <tr>
@@ -51,13 +43,43 @@
             </table>
         </div>
     </div>
+
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="exampleModalLabel">文章分类</h4>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <!-- //隐藏域 -->
+                        <input type="hidden" name="" id="cateID">
+                        <div class="form-group">
+                            <label for="recipient-name" class="control-label">文章分类名称</label>
+                            <input type="text" class="form-control" id="recipient-name">
+                        </div>
+                        <div class="form-group">
+                            <label for="message-text" class="control-label">文章分类别名</label>
+                            <textarea class="form-control" id="message-text"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" id="btn-cancel">取消</button>
+                    <button type="button" class="btn btn-primary" id="btn-confirm">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script type="text/html" id="list">
         {{each data}}
         <tr>
             <td>{{$value.name}}</td>
             <td>{{$value.slug}}</td>
             <td class="text-center">
-                <a href="javascript:void(0)" data-id="{{$value.id}}" data-toggle="modal" class=" btn btn-info btn-xs">编辑</a>
+                <a href="javascript:void(0)" data-id="{{$value.id}}" data-toggle="modal" class=" btn btn-info btn-xs"  data-target="#myModal">编辑</a>
                 <a href="javascript:void(0)" data-id="{{$value.id}}" class="btn btn-danger btn-xs">删除</a>
             </td>
         </tr>
@@ -77,7 +99,33 @@
                     }
                 })
             }
-
+            $('#myModal').on('show.bs.modal', function (e) {
+                if (e.relatedTarget == $('#xinzengfenlei')[0]) {
+                    $('#exampleModalLabel').text('新增文章分类名');
+                    $('#btn-confirm').addClass('btn-success');
+                    $('#btn-confirm').text('新增');
+                    $('#btn-confirm').on('click', function () {
+                        var name = $('#recipient-name').val();
+                        var slug = $('#message-text').val();
+                        $.post({
+                            url: 'http://localhost:8080/api/v1/admin/category/add',
+                            data: {
+                                name: name,
+                                slug: slug
+                            },
+                            success: function (res) {
+                                if (res.code == 201) {
+                                    $('#myModal').modal('hide');
+                                    getData();
+                                }
+                            }
+                        })
+                    })
+                } else {
+                    $('#exampleModalLabel').text('编辑文章分类名');
+                    $('#btn-confirm').text('编辑');
+                }
+            })
         })
     </script>
 </body>
