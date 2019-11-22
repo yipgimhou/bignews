@@ -59,12 +59,14 @@
             </div>
         </div>
     </div>
+    <!-- 第一个类别分类下拉列表模板 -->
     <script type="text/html" id="list">
         <option value="">所有分类</option>
         {{each data}}
             <option value='{{$value.id}}'>{{$value.name}}</option>
         {{/each}}
     </script>
+    <!-- 内容部分例表表格模板 -->
     <script type='text/html' id="artlist">
         {{each data.data}}
         <tr>
@@ -82,7 +84,9 @@
     </script>
     <script>
         $(function () {
+            //设置默认当前页为第一页
             var nowpage = 1;
+            //发起Ajax请求生成渲染第一个分类下拉菜单
             $.get({
                 url: "http://localhost:8080/api/v1/admin/category/list",
                 success: function (res) {
@@ -92,6 +96,7 @@
                     }
                 }
             });
+            //载入页面自动发起Ajax请求渲染文章列表部分
             $.get({
                 url: 'http://localhost:8080/api/v1/admin/article/query',
                 data: {
@@ -104,6 +109,7 @@
                     if (res.code == 200) {
                         var htmlStr = template('artlist', res);
                         $('tbody').html(htmlStr);
+                        //加入分页按钮部分的插件
                         $("#pagination3").pagination({
                             currentPage: 4,
                             totalPage: res.data.totalPage,
@@ -117,10 +123,16 @@
                                 $("#current3").text(current)
                             }
                         });
-                        $("#pagination3").pagination("setPage", 1, res.data.totalPage);// 参数2：当前页数，参数3：总页数
+                        //修改当前页和总页数
+                        // 参数2：当前页数，参数3：总页数
+                        $("#pagination3").pagination("setPage", 1, res.data.totalPage);
+                        //创建分页按钮的点击事件
                         $("#pagination3").on('click', 'a', function (e) {
+                            //清除初始化设置
                             e.preventDefault();
+                            //获取到点击的页码按钮标签上的data-current，即当前页码
                             var newpage = $(this).attr('data-current');
+                            //获取到当前页码重新刷新一次列表内容
                             $.get({
                                 url: 'http://localhost:8080/api/v1/admin/article/query',
                                 data: {
@@ -139,41 +151,54 @@
                     }
                 }
             })
-
+            //给筛选按钮创建点击事件
             $('#btnSearch').on('click', function (e) {
+                //清除初始化设置
                 e.preventDefault();
                 $.get({
                     url: 'http://localhost:8080/api/v1/admin/article/query',
                     data: {
                         type: $("#selCategory").val(),
                         state: $("#selStatus").val(),
+                        //筛选后刷新结果重新将当前页跳回第一页
                         page: 1,
                         perpage: 10
                     },
                     success: function (res) {
+                        //请求成功且内容不为空
                         if (res.code == 200 && res.data.data.length != 0) {
                             var htmlStr = template('artlist', res);
                             $('tbody').html(htmlStr);
+                            //若有内容则显示分页插件
                             $("#pagination3").show();
+                            //设置分页插件的当前页和总页数，参数1为当前页，参数2为总页数
                             $("#pagination3").pagination("setPage", 1, res.data.totalPage);
-                        } else {
+                        }
+                        //当请求后数据为空
+                        else {
+                            //设置提示信息
                             $('tbody').html('<tr><td style="text-align: center; font-size: 30px;" colspan=6><span>很抱歉，找不到对应的文章</span></td></tr>');
+                            //由于数据为空，所以隐藏分页插件
                             $("#pagination3").hide();
                         }
                     }
                 })
             })
-
+            //因为删除按钮是通过模板引擎生成的，所以要用事件委托方式创建点击事件
             $('tbody').on('click', '.delete', function () {
+                //通过删除按钮的a标签上的data-id，获取到当前数据的id
                 var artid = $(this).attr('data-id');
+                //加入提示选择框来警告用户，确认为true，取消为false
                 var choose = confirm("确认要删除吗？");
                 if (choose) {
+                    //发起删除的Ajax请求
                     $.post({
                         url: 'http://localhost:8080/api/v1/admin/article/delete',
                         data: {
                             id: artid
                         },
                         success: function (res) {
+                            //删除成功后，自动再获取一次页面内容信息
                             $.get({
                                 url: 'http://localhost:8080/api/v1/admin/article/query',
                                 data: {
