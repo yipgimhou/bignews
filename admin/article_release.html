@@ -10,8 +10,12 @@
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/iconfont.css">
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="./libs/jedate/css/jedate.css">
+    <link rel="stylesheet" href="./libs/jedate/css/jeDate-test.css">
     <!-- jq -->
     <script src="./libs/jquery-1.12.4.min.js"></script>
+    <script src="./libs/jedate/js/jedate.js"></script>
+    <script src="./libs/wangEditor-3.1.1/release/wangEditor.min.js"></script>
     <!-- 模板引擎 -->
     <script src="./libs/template-web.js"></script>
 </head>
@@ -19,14 +23,14 @@
 <body>
     <div class="container-fluid">
         <div class="common_title">
-            文章编辑
+            发布文章
         </div>
         <div class="container-fluid common_con">
             <form class="form-horizontal article_form" id="form">
                 <div class="form-group">
                     <label for="inputTitle" class="col-sm-2 control-label">文章标题：</label>
                     <div class="col-sm-10">
-                        <input type="text" name="title" class="form-control title" id="inputTitle" value="文章标题文字">
+                        <input type="text" name="title" class="form-control title" id="inputTitle" placeholder="文章标题文字">
                     </div>
                 </div>
                 <div class="form-group">
@@ -38,24 +42,25 @@
                 </div>
                 <div class="form-group">
                     <label for="inputCategory" class="col-sm-2 control-label">文章类别：</label>
-                    <div class="col-sm-4">
-                        <select class="form-control category" name="categoryId">
-                            <option>类别一</option>
-                            <option>类别二</option>
-                            <option>类别三</option>
-                            <option selected>类别四</option>
-                            <option>类别五</option>
-                        </select>
+                    <div class="col-sm-3">
+                        <select class="form-control category" name="categoryId"></select>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-2 control-label">发布时间：</label>
-                    <div class="col-sm-4">
+                    <!-- 引入的jedate日期插件 -->
+                    <div class="jeinpbox col-sm-4">
+                        <!-- 必须要加name属性 -->
+                        <input type="text" name='date' class="jeinput" id="testico" placeholder="YYYY-MM-DD">
+                        <div class="icons jebtns" onclick="jeDate('#testico',{trigger:false,format: 'YYYY-MM-DD'})">
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章内容：</label>
-                    <div class="col-sm-10">
+                    <!-- 引入的wangEditor的富文本编辑器 -->
+                    <div class='col-sm-8' id="editor">
+                        <p></p>
                     </div>
                 </div>
                 <div class="form-group">
@@ -67,6 +72,75 @@
             </form>
         </div>
     </div>
+    <!-- 文章类别下拉菜单模板引擎 -->
+    <script type="text/html" id="list">
+        {{each data}}
+        <option value="{{$value.id}}">{{$value.name}}</option>
+        {{/each}}
+    </script>
+    <script>
+        $(function () {
+            //获取下拉菜单内容，合成模板渲染页面
+            $.get({
+                url: "http://localhost:8080/api/v1/admin/category/list",
+                success: function (res) {
+                    if (res.code == 200) {
+                        var htmlStr = template("list", res);
+                        $("select").html(htmlStr);
+                    }
+                }
+            })
+            //通过添加change事件，图片预览功能
+            $('#inputCover').on('change', function () {
+                //获取上传图片信息
+                var picinfo = this.files[0];
+                //将图片转化成url地址
+                var url = URL.createObjectURL(picinfo);
+                //将url地址添加到img标签src里面
+                $('.article_cover').attr('src', url);
+            })
+            //引入jedate日期插件，设置日期插件的属性
+            jeDate("#testico", {
+                //层级最高
+                zIndex: 99999,
+                //不显示农历
+                festival: false,
+                //日期显示格式
+                format: 'YYYY-MM-DD',
+                //开启时间选择
+                isTime: true
+            });
+            //引入wangEditor富文本编辑器
+            var E = window.wangEditor;
+            var editor = new E('#editor');
+            editor.create();
+            //点击发表按钮触发事件
+            $('button.btn-success').on('click', function (e) {
+                //撤销按钮初始化
+                e.preventDefault();
+                //获取form表单中的数据内容
+                var form = $("#form")[0];
+                //将表单信息转化为二进制储存
+                var formData = new FormData(form);
+                //添加富文本编辑器插件中的内容，转化为二进制储存
+                formData.append('content', editor.txt.text());
+                //添加data中的state属性，表示发布或者存入草稿
+                formData.append('state', '已发布')
+                $.post({
+                    url: 'http://localhost:8080/api/v1/admin/article/publish',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (res) {
+                        if (res.code == 200) {
+                            //发表成功跳转到文章列表页面
+                            window.location.href = "./article_list.html";
+                        }
+                    }
+                })
+            })
+        })
+    </script>
 </body>
 
 </html>
